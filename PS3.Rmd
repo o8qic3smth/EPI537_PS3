@@ -28,6 +28,9 @@ source("fitparametric.R")
 
 # PROBLEM 1a.
 
+# Problem 1b
+exp(.7435228)
+
 ```{r, results=TRUE}
 # 1a
 s.df = with(df, Surv(duration, relapse))
@@ -35,19 +38,11 @@ df.cox.1a = coxph(s.df ~ rx, data=df)
 summary (df.cox.1a)
 
 # 1b
-df.cox.1b = coxph(s.df ~ rx + wbc + )
-
+df.cox.1b = coxph(s.df ~ rx + wbc + age, data=df)
+summary(df.cox.1b)
 ```
 # Problem 2c
-2c.i. Plot is below
-
-2c.ii. Subjectively, there appears to be a significant difference between the two groups. However, when I plotted the confidence intervals, there was a bit of overlapp, so with a forma analysis, there may not be significant diference in instantaneous risk at 8 months.
-
-2c.iii. The distribution of time until exit from maintenance does not differ signficantly by history of incarceration (p=0.3) 
-
-2c.iv. Based on the Z-column, none of the paramenters would be considered significant. Thus, I would state that based on the W-G-B test, there is no significant difference in the distribution of time to failure by history of incarceration.
-
-2c.v.  Hazard functions are crossing, which worsens the power of our logrank test. Not as clear how this would affect the expeted differences in our chi-square test.
+t.
 
 ```{r}
 ##Save for coding question later
