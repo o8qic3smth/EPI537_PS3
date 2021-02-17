@@ -32,14 +32,30 @@ source("fitparametric.R")
 exp(.7435228)
 
 ```{r, results=TRUE}
-# 1a
+### 1a
 s.df = with(df, Surv(duration, relapse))
 df.cox.1a = coxph(s.df ~ rx, data=df)
 summary (df.cox.1a)
 
-# 1b
+### 1b
 df.cox.1b = coxph(s.df ~ rx + wbc + age, data=df)
 summary(df.cox.1b)
+
+### 1c
+# dichotomize WBC based on the cutoff of 100
+df$wbcHigh [df$wbc >= 99] <- 1
+df$wbcHigh [df$wbc < 100] <- 0
+summary(coxph(s.df ~ rx + wbc + age + strata(wbcHigh), data=df))
+
+#perform test of hypothesis 
+
+### 1d
+summary(coxph(s.df ~ rx + wbc + age + strata(institution), data=df))
+
+### 1e
+cox.mp
+
+
 ```
 # Problem 2c
 t.
