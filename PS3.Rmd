@@ -31,8 +31,11 @@ source("fitparametric.R")
 ```{r, results=TRUE}
 # 1a
 s.df = with(df, Surv(duration, relapse))
-df.cox = coxph(s.df ~ rx, data=df)
-summary (df.cox)
+df.cox.1a = coxph(s.df ~ rx, data=df)
+summary (df.cox.1a)
+
+# 1b
+df.cox.1b = coxph(s.df ~ rx + wbc + )
 
 ```
 # Problem 2c
