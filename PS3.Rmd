@@ -1,0 +1,150 @@
+---
+title: "Problem Set 3 - Soriano"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r boilerplate, include=FALSE}
+##Boilerplate Items for BDS##
+library("tidyverse") 
+library("psych")
+library("haven")
+library("flexsurv")
+library("foreign")
+library("survival")
+library("flexsurv")
+rm(list=ls())
+
+#Setup the data directories(different kinds)
+df<-read.csv ("ccg803.csv")
+source("fitparametric.R")
+```
+
+# PROBLEM 1a.
+
+```{r, results=TRUE}
+# 1a
+s.df = with(df, Surv(duration, relapse))
+df.cox = coxph(s.df ~ rx, data=df)
+summary (df.cox)
+
+```
+# Problem 2c
+2c.i. Plot is below
+
+2c.ii. Subjectively, there appears to be a significant difference between the two groups. However, when I plotted the confidence intervals, there was a bit of overlapp, so with a forma analysis, there may not be significant diference in instantaneous risk at 8 months.
+
+2c.iii. The distribution of time until exit from maintenance does not differ signficantly by history of incarceration (p=0.3) 
+
+2c.iv. Based on the Z-column, none of the paramenters would be considered significant. Thus, I would state that based on the W-G-B test, there is no significant difference in the distribution of time to failure by history of incarceration.
+
+2c.v.  Hazard functions are crossing, which worsens the power of our logrank test. Not as clear how this would affect the expeted differences in our chi-square test.
+
+```{r}
+##Save for coding question later
+#prisonY <- survfit(Surv(time,event)~1,data=addicts[addicts$prison==1,], conf.type="log-log")
+#prisonN <- survfit(Surv(time,event)~1,data=addicts[addicts$prison==0,], conf.type="log-log")
+#question 2c.iii -- wording 
+
+#2c.i and 2c.ii
+prison<- survfit(Surv(time,event)~prison,data=addicts, conf.type="log-log")
+plot(prison, col=c("blue","orange"), conf.int = FALSE,
+     mark.time=TRUE,
+     xlab="Time (days)",ylab="Survival Probability",lwd=1.5)
+legend ("topright", c("No Prison", "Prison"), col=c("blue","orange"), lwd=c(2,2), cex=1.2)
+
+#2c.iii.
+s.prison <- with(addicts, Surv(time, event))
+survdiff (s.prison ~ prison, data=addicts)
+
+#2c.iv
+library(survMisc)
+comp(ten(prison))$tests$lrTests
+
+#2c.v.
+plot(prison, fun="cumhaz",
+      xlab="Time(days)", ylab="Cumulative hazard", main="Nelson-Aalen cumulative hazard estimates",
+      col=c("blue", "orange"), lwd=2)
+
+```
+
+# Problem 2d
+2d.i. Plot is below
+
+2c.ii. Subjectively, there appears to be a significant difference between the two groups.When plotting the CIs, with the exception of a smaller segment of time, the intervals do not seem to cross between the two groups.
+
+2c.iii. The distribution of time until exit from maintenance does  differ significantly by methadone dose levels (p<< 0.01) 
+
+2c.iv. Based on the Z-column, all of the paramenters would be considered significant. 
+
+2c.v.  Hazard functions appear to splay quite a bit near the end of the observation period. 
+
+
+```{r, results=TRUE}
+
+#2di. and ii.
+#Create binary variable 'highdose' with results---  1 for >60mg, 0 for <=60
+addicts$highdose<- as.numeric(addicts$dose>60)
+
+methadone <- survfit(Surv(time,event)~highdose,data=addicts, conf.type="log-log")
+plot(methadone, col=c("blue","orange"), conf.int = TRUE,
+     mark.time=TRUE,
+     xlab="Time (days)",ylab="Survival Probability",lwd=1.5)
+legend ("topright", c("Low Dose (60 or less)", "High dose (>60)"), col=c("blue","orange"), lwd=c(2,2), cex=1.2)
+
+#2d.iii.
+s.methadone <- with(addicts, Surv(time, event))
+survdiff (s.methadone ~ highdose, data=addicts)
+
+#2d.iv
+library(survMisc)
+comp(ten(methadone))$tests$lrTests
+
+#2d.v.
+plot(methadone, fun="cumhaz",
+      xlab="Time(days)", ylab="Cumulative hazard", main="Nelson-Aalen cumulative hazard estimates",
+      col=c("blue", "orange"), lwd=2)
+legend ("topleft", c("Low Dose (60 or less)", "High dose (>60)"), col=c("blue","orange"), lwd=c(2,2), cex=1.2)
+
+
+
+```
+# Problem 2e
+Sorry, I ran out of time to learn superscripts and subscribts in rmd, to I'll just have to talk it out.
+
+Ho: survivorship time distributions by history of incarceration, adjusting for clinic membership, is the same. 
+Ha: survivorship time distributions are not equal.
+
+Based on the p=0.04, we would reject the null hypothesis in lieu of the alternative.
+
+
+```{r, results=TRUE}
+survdiff (s.prison ~ prison + strata(clinic), data=addicts)
+
+```
+
+# Problem 2f
+
+Sorry, ran out of time to try this by hand. 
+
+At 4 months: 420 days (05% CI 376, 532)
+At 8 months: 427 days (05% CI 323, 515)
+At 12 months: 389 days (05% CI 301, 461)
+```{r, results=TRUE}
+s.addicts <- with(addicts, Surv(time, event))
+getmedianres (s.addicts, times = 120, confint = TRUE)
+getmedianres (s.addicts, times = 240, confint = TRUE)
+getmedianres (s.addicts, times = 360, confint = TRUE)
+```
+
+
+## Code Appendix
+
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
