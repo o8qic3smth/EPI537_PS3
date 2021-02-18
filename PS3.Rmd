@@ -35,12 +35,12 @@ exp(.7435228)
 ```{r, results=TRUE}
 ### 1a
 s.df = with(df, Surv(duration, relapse))
-df.cox.1a = coxph(s.df ~ rx, data=df)
-summary (df.cox.1a)
+coxFit.1a = coxph(s.df ~ rx, data=df)
+summary (coxFit.1a)
 
 ### 1b
-df.cox.1b = coxph(s.df ~ rx + wbc + age, data=df)
-summary(df.cox.1b)
+coxFit.1b = coxph(s.df ~ rx + wbc + age, data=df)
+summary(coxFit.1b)
 
 ### 1c
 # dichotomize WBC based on the cutoff of 100
@@ -54,112 +54,66 @@ summary(coxph(s.df ~ rx + wbc + age + strata(wbcHigh), data=df))
 summary(coxph(s.df ~ rx + wbc + age + strata(institution), data=df))
 
 ### 1e
-cox.mp
+coxFit.1e = coxph(s.df ~ rx, data=df, ties="exact")
+plot (survfit(coxFit.1e,newdata=data.frame(rx=1),conf.type="none"), col=2,lwd=2)
+lines(survfit(coxFit.1e,newdata=data.frame(rx=0),conf.type="none"),col=4,lwd=2)
+legend("bottomleft",fill=c(2,4),legend=c("Treatment","control"),bty='n')
+
+profile1=data.frame(wbc40=1,wbc200=0)
+profile2=data.frame(wbc40=0,wbc00=1)
+coxFit.1e = coxph(s.df ~ rx + df$age==5 + wbc40 + wbc200, data=df, ties="exact")
+plot (survfit(coxFit.1e,newdata=profile1,conf.type="none"), col=2,lwd=2)
+lines(survfit(coxFit.1e,newdata=data.frame(rx=0),conf.type="none"),col=4,lwd=2)
+legend("bottomleft",fill=c(2,4),legend=c("Treatment","control"),bty='n')
 
 
+herpes$type2=as.numeric(herpes$type==2)
+herpes$type3=as.numeric(herpes$type==3)
+coxfit=coxph(s.herpes~type2+type3+duration,data=herpes)
+
+#build age and wbc groups
+
+herpes$type2=as.numeric(herpes$type==2)
+herpes$type3=as.numeric(herpes$type==3)
+coxfit=coxph(s.herpes~type2+type3+duration,data=herpes)
+profile1=data.frame(type2=0,type3=0,duration=7)
+profile2=data.frame(type2=1,type3=0,duration=7)
+profile3=data.frame(type2=0,type3=1,duration=7)
+profile4=data.frame(type2=0,type3=0,duration=21)
+profile5=data.frame(type2=1,type3=0,duration=21)
+profile6=data.frame(type2=0,type3=1,duration=21)
+plot(survfit(coxfit,newdata=profile1,conf.type="none"),col=4,lwd=1.5)
+lines(survfit(coxfit,newdata=profile2,conf.type="none"),col=2,lwd=1.5)
+lines(survfit(coxfit,newdata=profile3,conf.type="none"),
+col="darkgreen",lwd=1.5)
+lines(survfit(coxfit,newdata=profile4,conf.type="none"),col=4,
+lwd=1.5,lty=2)
+lines(survfit(coxfit,newdata=profile5,conf.type="none"),col=2,
+lwd=1.5,lty=2)
+lines(survfit(coxfit,newdata=profile6,conf.type="none"),
+col="darkgreen",lwd=1.5,lty=2)
+legend("topright",
+legend=c("type1/duration=1wk","type2/duration=1wk",
+"type3/duration=1wk","type1/duration=3wks",
+"type2/duration=3wks","type3/duration=3wks"),
+col=c(4,2,"darkgreen",4,2,"darkgreen"),lwd=rep(2,6),
+lty=c(rep(1,3),rep(2,3)),cex=.7,bty="n")
 ```
-# Problem 2c
-t.
+# PROBLEM 2
 
 ```{r}
-##Save for coding question later
-#prisonY <- survfit(Surv(time,event)~1,data=addicts[addicts$prison==1,], conf.type="log-log")
-#prisonN <- survfit(Surv(time,event)~1,data=addicts[addicts$prison==0,], conf.type="log-log")
-#question 2c.iii -- wording 
-
-#2c.i and 2c.ii
-prison<- survfit(Surv(time,event)~prison,data=addicts, conf.type="log-log")
-plot(prison, col=c("blue","orange"), conf.int = FALSE,
-     mark.time=TRUE,
-     xlab="Time (days)",ylab="Survival Probability",lwd=1.5)
-legend ("topright", c("No Prison", "Prison"), col=c("blue","orange"), lwd=c(2,2), cex=1.2)
-
-#2c.iii.
-s.prison <- with(addicts, Surv(time, event))
-survdiff (s.prison ~ prison, data=addicts)
-
-#2c.iv
-library(survMisc)
-comp(ten(prison))$tests$lrTests
-
-#2c.v.
-plot(prison, fun="cumhaz",
-      xlab="Time(days)", ylab="Cumulative hazard", main="Nelson-Aalen cumulative hazard estimates",
-      col=c("blue", "orange"), lwd=2)
-
+#setup
+addicts<-read.csv ("addicts.csv")
+source("fitparametric.R")
 ```
 
-# Problem 2d
-2d.i. Plot is below
+```{r}
+##Problem 2a
+s.addicts = with(addicts, Surv(time, event))
+coxFit.2a = coxph(s.addicts ~ dose + prison + clinic, data=addicts)
+summary (coxFit.2a)
 
-2c.ii. Subjectively, there appears to be a significant difference between the two groups.When plotting the CIs, with the exception of a smaller segment of time, the intervals do not seem to cross between the two groups.
-
-2c.iii. The distribution of time until exit from maintenance does  differ significantly by methadone dose levels (p<< 0.01) 
-
-2c.iv. Based on the Z-column, all of the paramenters would be considered significant. 
-
-2c.v.  Hazard functions appear to splay quite a bit near the end of the observation period. 
-
-
-```{r, results=TRUE}
-
-#2di. and ii.
-#Create binary variable 'highdose' with results---  1 for >60mg, 0 for <=60
-addicts$highdose<- as.numeric(addicts$dose>60)
-
-methadone <- survfit(Surv(time,event)~highdose,data=addicts, conf.type="log-log")
-plot(methadone, col=c("blue","orange"), conf.int = TRUE,
-     mark.time=TRUE,
-     xlab="Time (days)",ylab="Survival Probability",lwd=1.5)
-legend ("topright", c("Low Dose (60 or less)", "High dose (>60)"), col=c("blue","orange"), lwd=c(2,2), cex=1.2)
-
-#2d.iii.
-s.methadone <- with(addicts, Surv(time, event))
-survdiff (s.methadone ~ highdose, data=addicts)
-
-#2d.iv
-library(survMisc)
-comp(ten(methadone))$tests$lrTests
-
-#2d.v.
-plot(methadone, fun="cumhaz",
-      xlab="Time(days)", ylab="Cumulative hazard", main="Nelson-Aalen cumulative hazard estimates",
-      col=c("blue", "orange"), lwd=2)
-legend ("topleft", c("Low Dose (60 or less)", "High dose (>60)"), col=c("blue","orange"), lwd=c(2,2), cex=1.2)
-
-
-
-```
-# Problem 2e
-Sorry, I ran out of time to learn superscripts and subscribts in rmd, to I'll just have to talk it out.
-
-Ho: survivorship time distributions by history of incarceration, adjusting for clinic membership, is the same. 
-Ha: survivorship time distributions are not equal.
-
-Based on the p=0.04, we would reject the null hypothesis in lieu of the alternative.
-
-
-```{r, results=TRUE}
-survdiff (s.prison ~ prison + strata(clinic), data=addicts)
-
-```
-
-# Problem 2f
-
-Sorry, ran out of time to try this by hand. 
-
-At 4 months: 420 days (05% CI 376, 532)
-At 8 months: 427 days (05% CI 323, 515)
-At 12 months: 389 days (05% CI 301, 461)
-```{r, results=TRUE}
-s.addicts <- with(addicts, Surv(time, event))
-getmedianres (s.addicts, times = 120, confint = TRUE)
-getmedianres (s.addicts, times = 240, confint = TRUE)
-getmedianres (s.addicts, times = 360, confint = TRUE)
-```
-
-
-## Code Appendix
-
-```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+##Problem 23b
+coxFit.2b = coxph(s.addicts ~ dose + prison + strata(clinic), data=addicts)
+summary (coxFit.2b)
 ```
