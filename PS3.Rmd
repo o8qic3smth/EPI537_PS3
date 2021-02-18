@@ -27,6 +27,7 @@ source("fitparametric.R")
 ```
 
 # PROBLEM 1a.
+The exponentiated coeffecient for rx is 0.73, which represenets the HR between control and treatment group. The odds of recurrence of leukemia in those that receive dactinomycin in addition to standard therapy is 27% lower than those that undergo stndard treatment.
 
 # Problem 1b
 exp(.7435228)
