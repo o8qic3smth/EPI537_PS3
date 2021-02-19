@@ -25,6 +25,9 @@ rm(list=ls())
 df<-read.csv ("ccg803.csv")
 source("fitparametric.R")
 ```
+Note-- I spent a good number of hours trying to get my subgroup functions to work, as well as struggled to effectively subset in R.
+I've run out of time so I'm submitting what little I have. Hope to do better next HW assignment
+
 
 # Problem 1a.
 The exponentiated coeffecient for rx is 0.73, which represenets the HR between control and treatment group. The odds of recurrence of leukemia in those that receive dactinomycin in addition to standard therapy is 27% lower than those that undergo standard therapy. 95% confidence interval for the hazard ratio is (0.55-0.99)
@@ -33,7 +36,12 @@ The exponentiated coeffecient for rx is 0.73, which represenets the HR between c
 After adjusting for age and white blood cell count, the exponentiated coefficient for rx is 0.74, with a 95% CI (0.55- 1.0) 
 
 # Problem 1c
+After adjusting for WBC and age, the association between risk of relapse and treatment does not appear to eb different in the two subpopulations defined by WBC threshold of 100. Though I'm wondering if I should have fit 2 different models by creating 2 different survfits.
 
+# Problem 1d
+
+# Problem 1e
+Code below is a partial build of the graph, I left some of the code that was giving me error messages (hoping to show that it wasn't for lack of trying)
 
 ```{r, results=TRUE}
 ### 1a
