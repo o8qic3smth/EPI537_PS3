@@ -48,8 +48,6 @@ df$wbcHigh [df$wbc >= 99] <- 1
 df$wbcHigh [df$wbc < 100] <- 0
 summary(coxph(s.df ~ rx + wbc + age + strata(wbcHigh), data=df))
 
-#perform test of hypothesis 
-
 ### 1d
 summary(coxph(s.df ~ rx + wbc + age + strata(institution), data=df))
 
@@ -113,7 +111,14 @@ s.addicts = with(addicts, Surv(time, event))
 coxFit.2a = coxph(s.addicts ~ dose + prison + clinic, data=addicts)
 summary (coxFit.2a)
 
-##Problem 23b
+##Problem 2b
 coxFit.2b = coxph(s.addicts ~ dose + prison + strata(clinic), data=addicts)
 summary (coxFit.2b)
+
+##Problem 2c
+coxFit.2c = coxph(s.addicts ~ dose + prison + strata(clinic) + prison*dose, data=addicts)
+summary (coxFit.2b)
+
+
+
 ```
